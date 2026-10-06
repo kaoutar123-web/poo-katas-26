@@ -8,7 +8,9 @@ final class Hero implements Fighter
 {
     public private(set) int $maxHp = 0;
 
-    public private(set) int $hp = 0;
+    public private(set) int $hp = 0 {
+        set => max(0, min($this->maxHp, $value));
+    }
 
     public bool $isFullHealth {
         get => $this->hp === $this->maxHp;
@@ -23,6 +25,16 @@ final class Hero implements Fighter
         int $maxHp = 10,
         public readonly int $strength = 2,
     ) {
+        if (trim($name) === '') {
+            throw new \InvalidArgumentException('Un héros a un nom.');
+        }
+
+        if ($maxHp < 1) {
+            throw new \InvalidArgumentException(
+                "maxHp doit valoir au moins 1, $maxHp reçu."
+            );
+        }
+
         $this->maxHp = $maxHp;
         $this->hp = $maxHp;
         $this->inventory = new Inventory();
@@ -30,12 +42,24 @@ final class Hero implements Fighter
 
     public function takeDamage(int $amount): void
     {
-        $this->hp = max(0, $this->hp - $amount);
+        if ($amount < 0) {
+            throw new \InvalidArgumentException(
+                "Les dégâts doivent être positifs, $amount reçu."
+            );
+        }
+
+        $this->hp -= $amount;
     }
 
     public function heal(int $amount): void
     {
-        $this->hp = min($this->maxHp, $this->hp + $amount);
+        if ($amount < 0) {
+            throw new \InvalidArgumentException(
+                "Le soin doit être positif, $amount reçu."
+            );
+        }
+
+        $this->hp += $amount;
     }
 
     public function isAlive(): bool
@@ -63,4 +87,3 @@ final class Hero implements Fighter
         return "{$this->name} ({$this->hp}/{$this->maxHp} PV)";
     }
 }
-

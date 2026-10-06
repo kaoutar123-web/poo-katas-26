@@ -9,12 +9,15 @@ class Dice
 {
     /**
      * Le nombre de faces, fixé à la création et jamais modifié : readonly.
-     * Chapitre Encapsulation : le constructeur doit refuser moins de 2 faces en
-     * levant InvalidArgumentException("Un dé a au moins 2 faces, $sides reçu.").
      */
     public function __construct(
         public readonly int $sides,
     ) {
+        if ($sides < 2) {
+            throw new \InvalidArgumentException(
+                "Un dé a au moins 2 faces, $sides reçu."
+            );
+        }
     }
 
     /** Fabrique statique : doit renvoyer un dé à 6 faces. */
@@ -35,4 +38,3 @@ class Dice
         return random_int(1, $this->sides);
     }
 }
-
