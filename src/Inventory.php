@@ -4,64 +4,70 @@ declare(strict_types=1);
 
 namespace Dungeon;
 
-/**
- * Le sac du héros. Niveau 2.
- * Countable et IteratorAggregate (niveau 4) permettent count($sac) et foreach ($sac as $item).
- *
- * @implements \IteratorAggregate<int, Item>
- */
-final class Inventory implements \Countable, \IteratorAggregate
+final class Inventory
 {
     /** @var Item[] Les objets transportés. */
     private array $items = [];
 
-    /** Le poids maximum transportable, fixé à la création : readonly. */
     public function __construct(
         public readonly float $maxWeight = 20.0,
     ) {
     }
 
-    /**
-     * Doit ajouter l'objet et renvoyer true.
-     * Niveau 2 : si le poids dépasse maxWeight, ne rien ajouter et renvoyer false.
-     * Niveau 3 : à la place du false, lever une InventoryFullException.
-     */
+    /** Ajoute un objet, sauf si le sac déborde. */
     public function add(Item $item): bool
     {
-        throw new \LogicException('À implémenter');
+        if ($this->totalWeight() + $item->weight > $this->maxWeight) {
+            return false;
+        }
+
+        $this->items[] = $item;
+
+        return true;
     }
 
-    /** Doit dire si un objet portant ce nom est dans le sac. */
-    public function has(string $name): bool
-    {
-        throw new \LogicException('À implémenter');
-    }
-
-    /** Doit retirer le premier objet portant ce nom (et ne rien faire s'il n'y est pas). */
-    public function remove(string $name): void
-    {
-        throw new \LogicException('À implémenter');
-    }
-
-    /** Doit renvoyer le nombre d'objets dans le sac. */
+    /** Le nombre d'objets dans le sac. */
     public function count(): int
     {
-        throw new \LogicException('À implémenter');
+        return count($this->items);
     }
 
-    /** Doit renvoyer la somme des poids. */
+    /** La somme des poids, en kilos. */
     public function totalWeight(): float
     {
-        throw new \LogicException('À implémenter');
+        $total = 0.0;
+
+        foreach ($this->items as $item) {
+            $total += $item->weight;
+        }
+
+        return $total;
     }
 
-    /**
-     * Doit permettre le foreach sur l'inventaire. Niveau 4.
-     *
-     * @return \Traversable<int, Item>
-     */
-    public function getIterator(): \Traversable
+    /** Vérifie si un objet portant ce nom est présent. */
+    public function has(string $name): bool
     {
-        throw new \LogicException('À implémenter');
+        foreach ($this->items as $item) {
+            if ($item->name === $name) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Retire le premier objet portant ce nom. */
+    public function remove(string $name): void
+    {
+        foreach ($this->items as $index => $item) {
+            if ($item->name === $name) {
+                unset($this->items[$index]);
+
+                // Réindexe le tableau pour garder des indices propres.
+                $this->items = array_values($this->items);
+
+                return;
+            }
+        }
     }
 }
