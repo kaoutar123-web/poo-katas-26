@@ -14,16 +14,24 @@ final class Inventory
     ) {
     }
 
-    /** Ajoute un objet, sauf si le sac déborde. */
-    public function add(Item $item): bool
+    /**
+     * Ajoute un objet, sauf si le sac déborde.
+     *
+     * @throws InventoryFullException
+     */
+    public function add(Item $item): void
     {
         if ($this->totalWeight() + $item->weight > $this->maxWeight) {
-            return false;
+            throw new InventoryFullException(
+                sprintf(
+                    '"%s" ne rentre pas : le sac ne porte que %s kg.',
+                    $item->name,
+                    $this->maxWeight,
+                )
+            );
         }
 
         $this->items[] = $item;
-
-        return true;
     }
 
     /** Le nombre d'objets dans le sac. */

@@ -69,17 +69,18 @@ final class Hero implements Fighter
 
     public function equip(Weapon $weapon): void
     {
-        throw new \LogicException('À implémenter');
+        $this->weapon = $weapon;
     }
 
     public function drink(Potion $potion): void
     {
-        throw new \LogicException('À implémenter');
+        $this->heal($potion->healing);
+        $this->inventory->remove($potion->name);
     }
 
     public function attack(): int
     {
-        throw new \LogicException('À implémenter');
+        return $this->strength + ($this->weapon?->damage ?? 0);
     }
 
     public function __toString(): string

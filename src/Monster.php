@@ -4,55 +4,72 @@ declare(strict_types=1);
 
 namespace Dungeon;
 
-/**
- * Un monstre du donjon. Classe ABSTRAITE : on ne croise jamais "un monstre",
- * on croise un gobelin ou un dragon. Niveau 3, devient Fighter au niveau 4.
- */
 abstract class Monster implements Fighter
 {
-    /** Le maximum de points de vie. Lecture publique, écriture réservée à la classe. */
     public private(set) int $maxHp = 0;
 
-    /** Les points de vie courants. Doit porter le même hook `set` que dans Hero : borné entre 0 et $maxHp. */
-    public private(set) int $hp = 0;
-
-    /** Propriété virtuelle : doit valoir true quand hp est égal à maxHp. */
-    public bool $isFullHealth {
-        get => throw new \LogicException('À implémenter');
+    public private(set) int $hp = 0 {
+        set => max(0, min($this->maxHp, $value));
     }
 
-    /** Doit garder le nom et initialiser maxHp puis hp à $maxHp. */
+    public bool $isFullHealth {
+        get => $this->hp === $this->maxHp;
+    }
+
     public function __construct(
         public readonly string $name,
         int $maxHp,
     ) {
-        throw new \LogicException('À implémenter');
+        if (trim($name) === '') {
+            throw new \InvalidArgumentException('Un monstre a un nom.');
+        }
+
+        if ($maxHp < 1) {
+            throw new \InvalidArgumentException(
+                "maxHp doit valoir au moins 1, $maxHp reçu."
+            );
+        }
+
+        $this->maxHp = $maxHp;
+        $this->hp = $maxHp;
     }
 
-    /** Doit retirer $amount points de vie, sans jamais descendre sous 0. */
     public function takeDamage(int $amount): void
     {
-        throw new \LogicException('À implémenter');
+        if ($amount < 0) {
+            throw new \InvalidArgumentException(
+                "Les dégâts doivent être positifs, $amount reçu."
+            );
+        }
+
+        $this->hp -= $amount;
     }
 
-    /** Doit rendre $amount points de vie, sans jamais dépasser $maxHp. */
     public function heal(int $amount): void
     {
-        throw new \LogicException('À implémenter');
+        if ($amount < 0) {
+            throw new \InvalidArgumentException(
+                "Le soin doit être positif, $amount reçu."
+            );
+        }
+
+        $this->hp += $amount;
     }
 
-    /** Doit renvoyer true tant qu'il reste au moins 1 point de vie. */
     public function isAlive(): bool
     {
-        throw new \LogicException('À implémenter');
+        return $this->hp > 0;
     }
 
-    /** Chaque monstre frappe à sa façon : c'est aux sous-classes de l'écrire. */
     abstract public function attack(): int;
 
-    /** Doit renvoyer "Gobelin (5/5 PV)". */
     public function __toString(): string
     {
-        throw new \LogicException('À implémenter');
+        return sprintf(
+            '%s (%d/%d PV)',
+            $this->name,
+            $this->hp,
+            $this->maxHp
+        );
     }
 }

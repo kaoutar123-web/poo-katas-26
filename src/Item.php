@@ -18,6 +18,11 @@ abstract class Item implements \Stringable
         }
     }
 
+    /**
+     * Chaque type d'objet doit fournir sa propre description.
+     */
+    abstract public function describe(): string;
+
     public function __toString(): string
     {
         return $this->name;
